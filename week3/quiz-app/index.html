@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <main>
+      <h1>Quiz</h1>
+      <div class="quiz-container">
+        <div class="welcome-screen">
+          <h2>Welcome to the quiz</h2>
+          <button class="start-quiz-btn">Lets start the quiz</button
+        </div>
+      </div>
+    </main>
+  </body>
+  <script>
+    // state
+    const questions = [{
+    "question": "Which language runs in a web browser?",
+    "a": "Java",
+    "b": "C",
+    "c": "Python",
+    "d": "JavaScript",
+    "correct": "d",
+    },
+    {
+    "question": "What does CSS stand for?",
+    "a": "Central Style Sheets",
+    "b": "Cascading Style Sheets",
+    "c": "Cascading Simple Sheets",
+    "d": "Cars SUVs Sailboats",
+    "correct": "b",
+    },
+    {
+    "question": "What does HTML stand for?",
+    "a": "Hypertext Markup Language",
+    "b": "Hypertext Markdown Language",
+    "c": "Hyperloop Machine Language",
+    "d": "Helicopters Terminals Motorboats Lamborginis",
+    "correct": "a",
+    },
+    {
+    "question": "What year was JavaScript launched?",
+    "a": "1996",
+    "b": "1995",
+    "c": "1994",
+    "d": "none of the above",
+    "correct": "b",
+    }]
+    const quizTime = 30
+    let quizTimeRemaining = quizTime;
+    let score = 0;
+    let quizStart = false;
+    let currentQuestion = 0;
+    let selectedOption = -1;
+    let timerId;
+
+    const quizContainer = document.querySelector(".quiz-container");
+    const welcomeScreen = document.querySelector(".welcome-screen");
+    const startQuizButton = welcomeScreen.querySelector(".start-quiz-btn")
+    startQuizButton.addEventListener("click", () => {
+      startQuiz();
+    })
+
+    // question screen
+    const questionScreen = document.createElement("div");
+    questionScreen.classList.add("question-screen");
+
+    const progressBar = document.createElement("progress");
+    progressBar.max = questions.length;
+    progressBar.value = 0;
+    const questionWrapper = document.createElement("div");
+
+    const question = document.createElement("h3");
+    const options = document.createElement("div");
+    for (let i = 0; i < 4; i++) {
+      const optionWrapper = document.createElement("div")
+      optionWrapper.classList.add("option-wrapper")
+      const option = document.createElement("input");
+      optionWrapper.addEventListener("click", () => {
+        options.querySelectorAll(".option-wrapper").forEach(oW => oW.classList.remove("selected"))
+        optionWrapper.classList.add("selected");
+        selectedOption = i;
+      })
+      const optionId = `option${i}`
+      option.name = "options"
+      option.type = "radio"
+      option.id = optionId
+      const label = document.createElement("label")
+      label.htmlFor = optionId
+      optionWrapper.append(option, label);
+      options.append(optionWrapper);
+    }
+
+    const timer = document.createElement("span")
+    timer.textContent = `${quizTimeRemaining}s`
+    timer.classList.add("timer")
+
+    const nextButton = document.createElement("button");
+    nextButton.classList.add("next-button")
+    nextButton.textContent = "Next"
+    
+    questionScreen.append(progressBar, question, options, timer, nextButton)
+    
+    // quiz end screen
+    const quizEndScreen = document.createElement("div")
+    const scoreElement = document.createElement("div")
+    scoreElement.classList.add("final-score")
+    const restartQuizBtn = document.createElement("button");
+    restartQuizBtn.classList.add("restart-btn")
+    restartQuizBtn.textContent = "Restart Quiz"
+    restartQuizBtn.addEventListener("click", restartQuiz)
+    quizEndScreen.append(scoreElement, restartQuizBtn);
+
+    nextButton.addEventListener("click", () => {
+      if (selectedOption === -1) return;
+      if (isSelectedOptionCorrect()) {
+        score++;
+      } 
+      if (currentQuestion === questions.length - 1) {
+        endQuiz()
+        return;
+      }
+      currentQuestion++;
+      selectedOption = -1;
+      updateQuestionScreen()
+    })
+
+    function endQuiz() {
+      quizStart = false;
+      questionScreen.remove();  
+      quizContainer.appendChild(quizEndScreen);
+      quizEndScreen.querySelector(".final-score").textContent = `You scored ${score}/${questions.length} points :)`
+      clearInterval(timerId)
+    }
+
+    function isSelectedOptionCorrect() {
+      const selection = ['a', 'b', 'c', 'd'][selectedOption]
+      return selection === questions[currentQuestion].correct
+    }
+
+    function startQuiz() {
+      quizStart = true;
+      welcomeScreen.remove();
+      quizContainer.append(questionScreen);
+      updateQuestionScreen();
+      startTimer();
+    }
+
+    function restartQuiz() {
+      score = 0;
+      selectedOption = -1;
+      currentQuestion = 0
+      quizTimeRemaining = quizTime
+      nextButton.textContent = "Next"
+      timer.textContent = `${quizTime}s`
+      quizEndScreen.remove()
+      quizContainer.append(welcomeScreen)
+    }
+
+    function updateQuestionScreen() {
+      const qs = questions[currentQuestion];
+      question.textContent = qs.question;
+      options.querySelectorAll(".option-wrapper").forEach((ow, index) => {
+        ow.classList.remove("selected")
+        ow.lastElementChild.textContent = qs[['a', 'b', 'c', 'd'][index]]
+        ow.firstElementChild.checked = false;
+      })
+      progressBar.value = score;
+      if (currentQuestion === questions.length - 1) {
+        nextButton.textContent = "Finish"
+      }
+    }
+
+    function startTimer() {
+      timerId = setInterval(tick, 1000)
+      function tick() {
+        quizTimeRemaining--; 
+        if (quizTimeRemaining === 0) {
+          clearInterval(id)
+          endQuiz()
+        } else  {
+          timer.textContent = `${quizTimeRemaining}s`
+        }
+      }
+    }
+     
+  </script>
+</html>
