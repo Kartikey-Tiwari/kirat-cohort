@@ -4,53 +4,329 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+    body {
+      display: flex;
+      height: 100dvh;
+      width: 100dvw;
+      background: linear-gradient(180deg, pink 0%, #6200c9 50%, pink 100%);
+      align-items: center;
+      justify-content: center;
+      font-family: monospace;
+    }
+    .quiz-container {
+      max-width: 1000px;
+      width: 80vw;
+      margin: 0 auto;
+    }
+    .question, .option-wrapper {
+      background: #003175;
+      border: 2px solid #DDB25C;
+      color: white;
+      font-size: 1.5rem;
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 1.5rem;
+      position: relative;
+    } 
+    .question {
+      text-align: center;
+      margin: 0;
+    }
+    .question::before, .question::after,
+    .option-wrapper::before, .option-wrapper::after {
+      content: "";
+      position: absolute;
+      width: 2rem;
+      height: 3px;
+      background: #DDB25C;
+      top: 50%;
+    }
+
+    .option-wrapper {
+      display: flex;
+      align-items: center;
+    }
+    label {
+      flex: 1;
+      cursor: pointer;
+      text-wrap: balance;
+    }
+    input[type="radio"] {
+      cursor: pointer;
+    }
+    .option-wrapper:nth-child(even)::before {
+      z-index: -1;
+    }
+    .question::before, .option-wrapper::before {
+      left: 0;
+      transform: translateX(-100%);
+    }
+    .question::after, .option-wrapper::after {
+      right: 0;
+      transform: translateX(100%);
+    }
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      row-gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .question-timer-wrapper {
+      position:relative;
+    }
+
+    .timer, .timer-progress {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      border-radius: 50%;
+      padding: 1rem 1.5rem 3rem;
+      background: linear-gradient(90deg, #003175 0%);
+      color: white;
+      width: 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .timer-progress {
+        padding: 2.8rem 1.8rem;
+        background: linear-gradient(90deg, #DDB25C 0%);
+    }
+
+    .next-button {
+      background: #003175;
+      padding: 0.5rem;
+      border-radius: 20px;
+      color: white;
+      border: 2px solid #DDB25C;
+      visibility: hidden;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .next-button.show {
+      visibility: visible;
+    }
+
+    .next-button:active {
+      transform: scale(0.9);
+    }
+
+    .selected {
+      box-shadow: 5px 8px 15px rgba(0, 0, 0, 0.7);
+      outline: 2px solid #DDB25C;
+    }
+
+    .question-screen {
+      display: grid;
+      gap: 1rem;
+    }
+
+    progress {
+      width: 100%;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      text-decoration: underline;
+      text-align: center;
+      color: white;
+      font-size: 3rem;
+    }
+
+    h2 {
+      font-size: 2rem;
+    }
+
+    .welcome-screen {
+      color: white;
+      text-align: center;
+    }
+
+    .start-quiz-btn, .restart-btn {
+      border-radius: 20px;
+      border: 2px solid #DDB25C;
+      background: #003175;
+      color: inherit;
+      font-size: 1.2rem;
+      padding: 0.5rem 1rem;
+      color: white;
+    }
+
+    .restart-btn {
+      margin-top: 1rem;
+      justify-self: center;
+    }
+
+    .welcome-screen p {
+      font-size: 1.5rem;
+    }
+
+    .final-score {
+      text-align: center;
+      font-size: 2rem;
+      background: #003175;
+      border: 3px solid #DDB25C;
+      color: white;
+      border-radius: 20px;
+      padding: 0.5rem 3rem;
+    }
+
+    .score-screen {
+      display: grid;
+    }
+    
+    @media (max-width: 768px) {
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      label {
+        font-size: 1.2rem;
+      }
+    }
+    </style>
   </head>
   <body>
     <main>
-      <h1>Quiz</h1>
+      <h1>The Web Dev Quiz</h1>
       <div class="quiz-container">
         <div class="welcome-screen">
-          <h2>Welcome to the quiz</h2>
-          <button class="start-quiz-btn">Lets start the quiz</button
+          <h2>Welcome to The Web Dev Quiz</h2>
+          <p>15 questions to test your mastery </p>
+          <button class="start-quiz-btn">Let's start the quiz</button
         </div>
       </div>
     </main>
   </body>
   <script>
     // state
-    const questions = [{
+const questions = [{
     "question": "Which language runs in a web browser?",
     "a": "Java",
     "b": "C",
     "c": "Python",
     "d": "JavaScript",
     "correct": "d",
-    },
-    {
+  },
+  {
     "question": "What does CSS stand for?",
     "a": "Central Style Sheets",
     "b": "Cascading Style Sheets",
     "c": "Cascading Simple Sheets",
     "d": "Cars SUVs Sailboats",
     "correct": "b",
-    },
-    {
+  },
+  {
     "question": "What does HTML stand for?",
     "a": "Hypertext Markup Language",
     "b": "Hypertext Markdown Language",
     "c": "Hyperloop Machine Language",
     "d": "Helicopters Terminals Motorboats Lamborginis",
     "correct": "a",
-    },
-    {
+  },
+  {
     "question": "What year was JavaScript launched?",
     "a": "1996",
     "b": "1995",
     "c": "1994",
     "d": "none of the above",
     "correct": "b",
-    }]
-    const quizTime = 30
+  },
+  {
+    "question": "Which HTTP method is idempotent and used to *update* an entire resource?",
+    "a": "POST",
+    "b": "PUT",
+    "c": "GET",
+    "d": "PATCH",
+    "correct": "b",
+  },
+  {
+    "question": "In CSS Flexbox, what does `align-items` control?",
+    "a": "Alignment along the main axis",
+    "b": "Alignment along the cross axis",
+    "c": "The spacing between flex items",
+    "d": "The size of flex items",
+    "correct": "b",
+  },
+  {
+    "question": "Which of the following CSS selectors has the *highest* specificity?",
+    "a": ".container .nav-link",
+    "b": "body #main-content",
+    "c": "a:hover",
+    "d": "div.row > p",
+    "correct": "b",
+  },
+  {
+    "question": "What is the value of `this` inside a JavaScript arrow function (=>)?",
+    "a": "The global object (window)",
+    "b": "The function itself",
+    "c": "The `this` of the enclosing lexical scope",
+    "d": "undefined",
+    "correct": "c",
+  },
+  {
+    "question": "In React, what is the primary way to pass data from a parent to a child component?",
+    "a": "state",
+    "b": "props",
+    "c": "Context API",
+    "d": "Redux",
+    "correct": "b",
+  },
+  {
+    "question": "What does 'WAI-ARIA' stand for in web accessibility?",
+    "a": "Web Accessibility Initiative - Accessible Rich Internet Applications",
+    "b": "Web Application Interface - Accessible Responsive Internet Apps",
+    "c": "Web Accessibility Integration - Real-time Internet Access",
+    "d": "World Accessible Internet - Responsive Integration Architecture",
+    "correct": "a",
+  },
+  {
+    "question": "What HTTP status code means 'Not Found'?",
+    "a": "200",
+    "b": "500",
+    "c": "301",
+    "d": "404",
+    "correct": "d",
+  },
+  {
+    "question": "What keyword is used to pause execution inside an `async` function until a Promise settles?",
+    "a": "wait",
+    "b": "pause",
+    "c": "await",
+    "d": "yield",
+    "correct": "c",
+  },
+  {
+    "question": "What is the name of the package manager that comes bundled with Node.js?",
+    "a": "Yarn",
+    "b": "npm",
+    "c": "Bower",
+    "d": "Webpack",
+    "correct": "b",
+  },
+  {
+    "question": "Which HTML5 element is best for wrapping main navigation links?",
+    "a": "<div>",
+    "b": "<section>",
+    "c": "<nav>",
+    "d": "<ul>",
+    "correct": "c",
+  },
+  {
+    "question": "What is the purpose of the `DOCTYPE` declaration in an HTML file?",
+    "a": "It defines the document's character set",
+    "b": "It links the CSS stylesheet",
+    "c": "It tells the browser which HTML version to use",
+    "d": "It loads the JavaScript files",
+    "correct": "c",
+  }
+]
+    const secondsPerQs = 10
+    const quizTime = questions.length * secondsPerQs;
     let quizTimeRemaining = quizTime;
     let score = 0;
     let quizStart = false;
@@ -74,15 +350,20 @@
     progressBar.value = 0;
     const questionWrapper = document.createElement("div");
 
+    const questionTimerWrapper = document.createElement("div")
+    questionTimerWrapper.classList.add("question-timer-wrapper")
     const question = document.createElement("h3");
+    question.classList.add("question")
     const options = document.createElement("div");
+    options.classList.add("options")
     for (let i = 0; i < 4; i++) {
       const optionWrapper = document.createElement("div")
       optionWrapper.classList.add("option-wrapper")
       const option = document.createElement("input");
-      optionWrapper.addEventListener("click", () => {
+      option.addEventListener("change", () => {
         options.querySelectorAll(".option-wrapper").forEach(oW => oW.classList.remove("selected"))
         optionWrapper.classList.add("selected");
+        nextButton.classList.add("show")
         selectedOption = i;
       })
       const optionId = `option${i}`
@@ -96,17 +377,22 @@
     }
 
     const timer = document.createElement("span")
-    timer.textContent = `${quizTimeRemaining}s`
+    const timerProgress = document.createElement("span")
+    timerProgress.classList.add("timer-progress")
+    timer.textContent = `${quizTimeRemaining}`
     timer.classList.add("timer")
+
+    questionTimerWrapper.append(timerProgress, timer, question)
 
     const nextButton = document.createElement("button");
     nextButton.classList.add("next-button")
     nextButton.textContent = "Next"
     
-    questionScreen.append(progressBar, question, options, timer, nextButton)
+    questionScreen.append(progressBar, questionTimerWrapper, options,  nextButton)
     
     // quiz end screen
     const quizEndScreen = document.createElement("div")
+    quizEndScreen.classList.add("score-screen")
     const scoreElement = document.createElement("div")
     scoreElement.classList.add("final-score")
     const restartQuizBtn = document.createElement("button");
@@ -129,11 +415,27 @@
       updateQuestionScreen()
     })
 
+    function getQuizResult(correctAnswers, totalQuestions) {
+      const percentage = (correctAnswers / totalQuestions) * 100;
+
+      if (percentage >= 90) {
+        return `Score: ${percentage.toFixed(0)}% (⌐■_■) Web Master!`;
+      } else if (percentage >= 70) {
+        return `Score: ${percentage.toFixed(0)}% (•‿•) Great Job!`;
+      } else if (percentage >= 50) {
+        return `Score: ${percentage.toFixed(0)}% (•_•) Solid Effort!`;
+      } else if (percentage >= 30) {
+        return `Score: ${percentage.toFixed(0)}% (o_O) Needs Review.`;
+      } else {
+        return `Score: ${percentage.toFixed(0)}% (╥_╥) Keep Studying.`;
+      }
+    }
+
     function endQuiz() {
       quizStart = false;
       questionScreen.remove();  
       quizContainer.appendChild(quizEndScreen);
-      quizEndScreen.querySelector(".final-score").textContent = `You scored ${score}/${questions.length} points :)`
+      quizEndScreen.querySelector(".final-score").textContent = getQuizResult(score, questions.length)
       clearInterval(timerId)
     }
 
@@ -157,6 +459,7 @@
       quizTimeRemaining = quizTime
       nextButton.textContent = "Next"
       timer.textContent = `${quizTime}s`
+      timerProgress.style.background = `linear-gradient(90deg, #DDB25C 100%, transparent 100%)`;
       quizEndScreen.remove()
       quizContainer.append(welcomeScreen)
     }
@@ -169,7 +472,8 @@
         ow.lastElementChild.textContent = qs[['a', 'b', 'c', 'd'][index]]
         ow.firstElementChild.checked = false;
       })
-      progressBar.value = score;
+      progressBar.value = currentQuestion;
+      nextButton.classList.remove("show");
       if (currentQuestion === questions.length - 1) {
         nextButton.textContent = "Finish"
       }
@@ -180,10 +484,11 @@
       function tick() {
         quizTimeRemaining--; 
         if (quizTimeRemaining === 0) {
-          clearInterval(id)
           endQuiz()
         } else  {
-          timer.textContent = `${quizTimeRemaining}s`
+          timer.textContent = `${quizTimeRemaining}`
+          const percentLeft = (quizTimeRemaining/quizTime)*100
+          timerProgress.style.background = `linear-gradient(90deg, #DDB25C ${percentLeft}%, transparent ${percentLeft}%)`;
         }
       }
     }
