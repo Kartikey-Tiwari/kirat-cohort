@@ -13,6 +13,7 @@
       align-items: center;
       justify-content: center;
       font-family: monospace;
+      margin: 0;
     }
     .quiz-container {
       max-width: 1000px;
@@ -46,6 +47,15 @@
     .option-wrapper {
       display: flex;
       align-items: center;
+      cursor: pointer;
+    }
+
+    .option-wrapper.hidden {
+      visibility: hidden;
+    }
+    .option-wrapper.wrong {
+      border-color: red;
+      outline: none;
     }
     label {
       flex: 1;
@@ -102,16 +112,12 @@
       border-radius: 20px;
       color: white;
       border: 2px solid #DDB25C;
-      visibility: hidden;
       cursor: pointer;
       font-size: 1.2rem;
     }
 
-    .next-button.show {
-      visibility: visible;
-    }
 
-    .next-button:active {
+    .next-button:active:not(:disabled) {
       transform: scale(0.9);
     }
 
@@ -127,7 +133,14 @@
 
     progress {
       width: 100%;
-      margin-bottom: 2rem;
+    }
+
+    .info-bar {
+      color: white;
+      display: flex;
+      justify-content: space-around;
+      font-size: 1rem;
+      font-weight: bold;
     }
 
     h1 {
@@ -187,6 +200,53 @@
       label {
         font-size: 1.2rem;
       }
+    }
+
+    .lifeline, .lifeline-container {
+      background: #003175;
+      border: 3px solid #DDB25C;
+      border-radius: 1.5rem;
+      display: flex;
+      justify-content: center;
+      color: white;
+      margin: 0 auto;
+      gap: 3rem;
+      padding: 0.5rem 3rem;
+    }
+
+    .lifeline {
+      position: relative;
+      border-radius: 50%;
+      width: 6rem;
+      height: 4rem;
+      align-items: center;
+      font-weight: bold;
+      font-size: 1.3rem;
+    }
+
+    .lifeline:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+
+    .lifeline:active:not(:disabled) {
+      transform: scale(0.9);
+    }
+
+    .lifeline:disabled::before {
+      content: "❌";
+      position: absolute;
+      font-size: 3rem;
+      opacity: 0.9;
+    }
+
+    .next-button:disabled {
+      opacity: 0.7;
+      color: #666666;
+      background-color: #cccccc;
+      cursor: not-allowed;
+      background: #546e7a; 
+      border: 3px solid #8c8c8c; 
+      color: #e0e0e0;
     }
     </style>
   </head>
@@ -348,6 +408,13 @@ const questions = [{
     const progressBar = document.createElement("progress");
     progressBar.max = questions.length;
     progressBar.value = 0;
+
+    const infoBar = document.createElement("div");
+    infoBar.classList.add("info-bar")
+    infoBar.insertAdjacentHTML("afterbegin", `<span>Question: <span class="qs-no">1</span>/${questions.length}</span><span>Score: <span class="score">0</span>/${questions.length}</span>`)
+    const scoreSpan = infoBar.querySelector(".score")
+    const qsNoSpan = infoBar.querySelector(".qs-no")
+
     const questionWrapper = document.createElement("div");
 
     const questionTimerWrapper = document.createElement("div")
@@ -360,11 +427,12 @@ const questions = [{
       const optionWrapper = document.createElement("div")
       optionWrapper.classList.add("option-wrapper")
       const option = document.createElement("input");
-      option.addEventListener("change", () => {
+      optionWrapper.addEventListener("click", () => {
         options.querySelectorAll(".option-wrapper").forEach(oW => oW.classList.remove("selected"))
         optionWrapper.classList.add("selected");
-        nextButton.classList.add("show")
+        nextButton.disabled = false;
         selectedOption = i;
+        option.click();
       })
       const optionId = `option${i}`
       option.name = "options"
@@ -386,9 +454,21 @@ const questions = [{
 
     const nextButton = document.createElement("button");
     nextButton.classList.add("next-button")
+    nextButton.disabled = true;
     nextButton.textContent = "Next"
+
+    const lifelinesArray = [{name: "fiftyFifty", used: false, handler: handleFiftyFifty}, {name: "doubleDip", used: false, handler: handleDoubleDip}];
+    let curLifeline = null;
+    const lifelineContainer = document.createElement("div")
+    lifelineContainer.classList.add("lifeline-container")
+    const lifelinesHTML = `<button class="lifeline fifty-fifty">50:50</button><button class="lifeline double-dip">x2</button>`
+    lifelineContainer.insertAdjacentHTML("afterbegin", lifelinesHTML)
+    const fiftyFifty = lifelineContainer.querySelector(".fifty-fifty")
+    fiftyFifty.addEventListener("click", () => handleLifeline("fiftyFifty"));
+    const doubleDip = lifelineContainer.querySelector(".double-dip")
+    doubleDip.addEventListener("click", () => handleLifeline("doubleDip"))
     
-    questionScreen.append(progressBar, questionTimerWrapper, options,  nextButton)
+    questionScreen.append(progressBar, infoBar, questionTimerWrapper, options,  nextButton, lifelineContainer)
     
     // quiz end screen
     const quizEndScreen = document.createElement("div")
@@ -405,6 +485,16 @@ const questions = [{
       if (selectedOption === -1) return;
       if (isSelectedOptionCorrect()) {
         score++;
+      } else {
+        if (curLifeline && curLifeline.name === "doubleDip") {
+          dipsLeft--;
+          if (dipsLeft !== 0) {
+            const ow = options.children[selectedOption];
+            ow.classList.add("wrong")
+            ow.firstElementChild.disabled = true;
+            return
+          }
+        }
       } 
       if (currentQuestion === questions.length - 1) {
         endQuiz()
@@ -412,6 +502,7 @@ const questions = [{
       }
       currentQuestion++;
       selectedOption = -1;
+      curLifeline = null;
       updateQuestionScreen()
     })
 
@@ -457,9 +548,13 @@ const questions = [{
       selectedOption = -1;
       currentQuestion = 0
       quizTimeRemaining = quizTime
+      dipsLeft = 2
+      curLifeline = null
       nextButton.textContent = "Next"
       timer.textContent = `${quizTime}s`
       timerProgress.style.background = `linear-gradient(90deg, #DDB25C 100%, transparent 100%)`;
+      Array.from(lifelineContainer.children).forEach(c => c.disabled = false) 
+      lifelinesArray.forEach(l => l.used = false)
       quizEndScreen.remove()
       quizContainer.append(welcomeScreen)
     }
@@ -469,11 +564,16 @@ const questions = [{
       question.textContent = qs.question;
       options.querySelectorAll(".option-wrapper").forEach((ow, index) => {
         ow.classList.remove("selected")
+        ow.classList.remove("hidden")
+        ow.classList.remove("wrong")
+        ow.firstElementChild.disabled = false;
         ow.lastElementChild.textContent = qs[['a', 'b', 'c', 'd'][index]]
         ow.firstElementChild.checked = false;
       })
       progressBar.value = currentQuestion;
-      nextButton.classList.remove("show");
+      scoreSpan.textContent = score
+      qsNoSpan.textContent = currentQuestion + 1
+      nextButton.disabled = true;
       if (currentQuestion === questions.length - 1) {
         nextButton.textContent = "Finish"
       }
@@ -492,6 +592,46 @@ const questions = [{
         }
       }
     }
-     
+
+    function handleLifeline(name) {
+      if (curLifeline) {
+        return;
+      }
+      curLifeline = lifelinesArray.find(o => o.name === name);
+      if (curLifeline.used) {
+        curLifeline = null;
+        return;
+      }
+
+      curLifeline.used = true;
+      curLifeline.handler()
+    }
+
+    function handleFiftyFifty() {
+      const qs = questions[currentQuestion];
+      const incorrect = ['a', 'b', 'c', 'd'].reduce((agg, option, idx) => {
+        if (option !== qs.correct) {
+          agg.push(idx)
+        }
+        return agg
+      }, [])
+
+      const index1 = Math.floor(Math.random() * 3);
+      let index2 = Math.floor(Math.random() * 3);
+
+      while(index1 === index2) {
+        index2 = Math.floor(Math.random() * 3);
+      }
+      
+      options.children[incorrect[index1]].classList.add("hidden")
+      options.children[incorrect[index2]].classList.add("hidden")
+      fiftyFifty.disabled = true
+    }
+
+    let dipsLeft = 2;
+    function handleDoubleDip() {
+      doubleDip.disabled = true;
+    }
+
   </script>
 </html>
