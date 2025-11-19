@@ -192,16 +192,6 @@
       display: grid;
     }
     
-    @media (max-width: 768px) {
-      .options {
-        grid-template-columns: 1fr;
-      }
-
-      label {
-        font-size: 1.2rem;
-      }
-    }
-
     .lifeline, .lifeline-container {
       background: #003175;
       border: 3px solid #DDB25C;
@@ -247,6 +237,42 @@
       background: #546e7a; 
       border: 3px solid #8c8c8c; 
       color: #e0e0e0;
+    }
+
+    @media (max-width: 768px) {
+      .options {
+        grid-template-columns: 1fr;
+      }
+
+      label {
+        font-size: 1.2rem;
+      }
+
+      .option-wrapper::before, .option-wrapper::after, .question::before, .question::after {
+        width: 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .lifeline-container {
+        padding-inline: 1rem;
+        gap: 2rem;
+      }
+
+      .question {
+        font-size: 1.3rem;
+      }
+
+      .info-bar {
+        font-size: 0.9rem;
+        justify-content: space-between;
+      }
     }
     </style>
   </head>
@@ -393,6 +419,16 @@ const questions = [{
     let currentQuestion = 0;
     let selectedOption = -1;
     let timerId;
+
+    const tickSound = new Audio("tick.m4a");
+    tickSound.volume = 0.3
+
+    function playTick() {
+      tickSound.currentTime = 0.3;
+      tickSound.play().catch(error => {
+        console.log("Audio playback failed:" ,error)
+      })
+    }
 
     const quizContainer = document.querySelector(".quiz-container");
     const welcomeScreen = document.querySelector(".welcome-screen");
@@ -582,6 +618,7 @@ const questions = [{
     function startTimer() {
       timerId = setInterval(tick, 1000)
       function tick() {
+        playTick();
         quizTimeRemaining--; 
         if (quizTimeRemaining === 0) {
           endQuiz()
@@ -626,6 +663,7 @@ const questions = [{
       options.children[incorrect[index1]].classList.add("hidden")
       options.children[incorrect[index2]].classList.add("hidden")
       fiftyFifty.disabled = true
+      curLifeline = null;
     }
 
     let dipsLeft = 2;
