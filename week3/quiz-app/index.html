@@ -7,8 +7,7 @@
     <style>
     body {
       display: flex;
-      height: 100dvh;
-      width: 100dvw;
+      min-height: 100dvh;
       background: linear-gradient(180deg, pink 0%, #6200c9 50%, pink 100%);
       align-items: center;
       justify-content: center;
@@ -48,11 +47,13 @@
       display: flex;
       align-items: center;
       cursor: pointer;
+      transition: opacity 0.2s ease;
     }
 
-    .option-wrapper.hidden {
-      visibility: hidden;
+    .hidden {
+      opacity: 0;
     }
+
     .option-wrapper.wrong {
       border-color: red;
       outline: none;
@@ -148,6 +149,8 @@
       text-align: center;
       color: white;
       font-size: 3rem;
+      margin-top: 0;
+      padding-top: 1rem;
     }
 
     h2 {
@@ -212,6 +215,7 @@
       align-items: center;
       font-weight: bold;
       font-size: 1.3rem;
+      transition: opacity 0.1s linear;
     }
 
     .lifeline:hover:not(:disabled) {
@@ -245,7 +249,7 @@
       }
 
       label {
-        font-size: 1.2rem;
+        font-size: 1rem;
       }
 
       .option-wrapper::before, .option-wrapper::after, .question::before, .question::after {
@@ -257,21 +261,38 @@
       }
 
       h2 {
-        font-size: 1.5rem;
+        font-size: 1.2rem;
       }
 
       .lifeline-container {
         padding-inline: 1rem;
         gap: 2rem;
-      }
-
-      .question {
-        font-size: 1.3rem;
+        margin-bottom: 1rem;
       }
 
       .info-bar {
-        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+
+      .lifeline {
+        height: auto;
+      }
+
+      .question {
+        font-size: 1.2rem;
+      }
+
+      .options {
+        margin-bottom: 0;
+      }
+
+      .info-bar {
+        font-size: 0.8rem;
         justify-content: space-between;
+      }
+
+      body:has(> main .question-screen) {
+        display: block;
       }
     }
     </style>
@@ -520,6 +541,7 @@ const questions = [{
     nextButton.addEventListener("click", () => {
       if (selectedOption === -1) return;
       if (isSelectedOptionCorrect()) {
+        fiftyFifty.classList.remove("hidden");
         score++;
       } else {
         if (curLifeline && curLifeline.name === "doubleDip") {
@@ -529,6 +551,9 @@ const questions = [{
             ow.classList.add("wrong")
             ow.firstElementChild.disabled = true;
             return
+          }
+          else {
+            fiftyFifty.classList.remove("hidden");
           }
         }
       } 
@@ -659,9 +684,20 @@ const questions = [{
       while(index1 === index2) {
         index2 = Math.floor(Math.random() * 3);
       }
+
+      for(let i = 0; i < 4; i++) {
+        const o = options.children[i]
+        o.firstElementChild.checked = false;
+        o.classList.remove("selected")
+      }
       
-      options.children[incorrect[index1]].classList.add("hidden")
-      options.children[incorrect[index2]].classList.add("hidden")
+      nextButton.disabled = true;
+      const o1 = options.children[incorrect[index1]]
+      o1.classList.add("hidden")
+      o1.disabled = true;
+      const o2 = options.children[incorrect[index2]]
+      o2.classList.add("hidden")
+      o2.disabled = true
       fiftyFifty.disabled = true
       curLifeline = null;
     }
@@ -669,6 +705,8 @@ const questions = [{
     let dipsLeft = 2;
     function handleDoubleDip() {
       doubleDip.disabled = true;
+      if (!fiftyFifty.disabled)
+        fiftyFifty.classList.add("hidden");
     }
 
   </script>
