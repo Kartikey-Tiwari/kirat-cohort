@@ -126,7 +126,7 @@ const numCardSelector = document.querySelector("#num-cards");
 POKEMON_TYPES.forEach((type) => {
   const option = document.createElement("option");
   option.value = type;
-  option.textContent = type;
+  option.textContent = type[0].toUpperCase() + type.slice(1);
   typeSelector.appendChild(option);
 });
 numCardSelector.value = DEFAULT_CARDS;
