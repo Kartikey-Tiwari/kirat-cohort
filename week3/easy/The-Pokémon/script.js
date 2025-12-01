@@ -122,6 +122,7 @@ const P = new Pokedex.Pokedex();
 const form = document.querySelector("form");
 const typeSelector = document.querySelector("#pokemon-type");
 const numCardSelector = document.querySelector("#num-cards");
+const submit = form.querySelector("button");
 
 POKEMON_TYPES.forEach((type) => {
   const option = document.createElement("option");
@@ -133,6 +134,8 @@ numCardSelector.value = DEFAULT_CARDS;
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
+  submit.textContent = "Loading...";
+  submit.disabled = true;
   const pokemonType = typeSelector.value;
   if (POKEMON_TYPES.findIndex((t) => t === pokemonType) === -1) return;
   const numCards = Number(numCardSelector.value);
@@ -140,35 +143,101 @@ form.addEventListener("submit", async (e) => {
 
   const pokemonsOfSelectedType = (await P.getTypeByName(pokemonType)).pokemon;
   shuffle(pokemonsOfSelectedType);
-  const pokemonsData = pokemonsOfSelectedType.slice(0, numCards);
-  pokemonsData.forEach(async (p, i) => {
+  const selectedPokemons = pokemonsOfSelectedType.slice(0, numCards);
+  const promises = selectedPokemons.map(async (p) => {
     const data = await P.resource(p.pokemon.url);
     const id = data.id >= 10000 ? data.species.url.split("/").at(-2) : data.id;
-    const pokemon = {
+    const sprite =
+      data.sprites.front_default ??
+      (await P.resource(`/api/v2/pokemon/${id}`)).sprites.front_default;
+
+    return {
       id,
       name: formatPokemonName(data.name),
       stats: data.stats.reduce((agg, s) => {
-        if (STATS.findIndex((stat) => stat === s.stat.name) !== -1) {
-          agg.push({
-            name: s.stat.name,
-            base_stat: s.base_stat,
-          });
+        if (STATS.includes(s.stat.name)) {
+          agg[s.stat.name] = s.base_stat;
         }
         return agg;
-      }, []),
+      }, {}),
       types: data.types.map((t) => t.type.name),
       abilities: data.abilities.map((a) => a.ability.name),
       height: data.height,
       weight: data.weight,
-      sprite:
-        data.sprites.front_default ??
-        (await P.resource(`/api/v2/pokemon/${id}`)).sprites.front_default,
+      sprite,
     };
-    pokemonsData[i] = pokemon;
   });
 
-  console.log(pokemonsData);
+  const pokemonsData = await Promise.all(promises);
+
+  form.remove();
 
   typeSelector.value = "";
   numCardSelector.value = DEFAULT_CARDS;
+  submit.textContent = "Generate Cards";
+  submit.disabled = false;
+
+  document.body.insertAdjacentHTML(
+    "afterbegin",
+    createPokemonCard(pokemonsData[0]),
+  );
 });
+
+function createPokemonCard({
+  name,
+  id,
+  sprite,
+  types,
+  height,
+  weight,
+  stats: { hp, attack, defense, speed },
+  abilities,
+}) {
+  return `
+<div class="pokemon-card-container">
+  <div class="pokemon-card">
+    <div class="card-face front">
+      <div class="header">
+        <h2 class="name">${name}</h2>
+        <span class="id">${id}</span>
+      </div>
+      <div>
+        <img class="sprite" src="${sprite}">
+      </div>
+      <div>
+        <div class="types">${types.join(" ")}</div>
+        <div class="physical">
+          <div> 
+            <span>Height</span>
+            <span class="height">${height}</span>
+          </div>
+          <div> 
+            <span>Weight</span>
+            <span class="weight">${weight}</span>
+          </div>
+        </div>
+        <div class="stats">
+          <div>
+            <span>HP</span>
+            <span class="hp">${hp}</span>
+          </div>
+          <div>
+            <span>Attack</span>
+            <span class="attack">${attack}</span>
+          </div>
+          <div>
+            <span>Defense</span>
+            <span class="defense">${defense}</span>
+          </div>
+          <div>
+            <span>Speed</span>
+            <span class="speed">${speed}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-face back"></div>
+  </div>
+</div>
+`;
+}
