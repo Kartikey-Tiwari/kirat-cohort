@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Pokemon</title>
+    <script src="https://unpkg.com/pokeapi-js-wrapper/dist/index.js"></script>
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <form>
+      <h1>Pokemon Card Generator</h1>
+      <p>Select the type of pokemons and the number of cards</p>
+      <div>
+        <label for="pokemon-type">Pokemon type</label>
+        <select name="pokemon-type" id="pokemon-type" required>
+          <option value="">Choose a type...</option>
+        </select>
+      </div>
+      <div>
+        <lable for="num-cards">Number of cards(max. 30)</lable>
+        <input
+          id="num-cards"
+          type="number"
+          min="1"
+          max="30"
+          inputmode="numeric"
+          required
+        />
+      </div>
+      <button>Generate Cards</button>
+    </form>
+  </body>
+</html>
