@@ -167,6 +167,25 @@ const form = document.querySelector("form");
 const typeSelector = document.querySelector("#pokemon-type");
 const numCardSelector = document.querySelector("#num-cards");
 const submit = form.querySelector("button");
+const nav = (() => {
+  const div = document.createElement("div");
+  div.insertAdjacentHTML(
+    "afterbegin",
+    `<h2>Your cards</h2><button>Generate more cards</button>`,
+  );
+  div.classList.add("nav");
+  div.querySelector("button").addEventListener("click", () => {
+    document.startViewTransition(() => {
+      document.body.innerHTML = "";
+      document.body.append(form);
+      nav.remove();
+      nav.style.opacity = "";
+      nav.style.background = "";
+      document.body.style.alignContent = "";
+    });
+  });
+  return div;
+})();
 
 POKEMON_TYPES.forEach((type) => {
   const option = document.createElement("option");
@@ -219,14 +238,19 @@ form.addEventListener("submit", async (e) => {
   const pokemonsData = await Promise.all(promises);
 
   form.remove();
+  document.body.style.alignContent = "start";
+  nav.style.opacity = 0;
+  document.body.prepend(nav);
 
   typeSelector.value = "";
   numCardSelector.value = DEFAULT_CARDS;
   submit.textContent = "Generate Cards";
   submit.disabled = false;
 
-  const anglePerCard = 10;
-  const maxSpread = 90;
+  const isSmallScreen = window.innerWidth < 600;
+
+  const anglePerCard = isSmallScreen ? 5 : 10;
+  const maxSpread = isSmallScreen ? 45 : 90;
   let totalArc = (numCards - 1) * anglePerCard;
   if (totalArc > maxSpread) {
     totalArc = maxSpread;
@@ -256,6 +280,8 @@ form.addEventListener("submit", async (e) => {
   });
 
   setTimeout(() => {
+    nav.style.opacity = "";
+    nav.style.background = "white";
     const firstPositions = pokemonCards.map((card) =>
       card.getBoundingClientRect(),
     );

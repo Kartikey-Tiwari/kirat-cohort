@@ -284,3 +284,27 @@ button:disabled:hover {
     transform: translateY(0%);
   }
 }
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  grid-column: 1 / -1;
+  width: 100%;
+  transition: background 1s linear;
+}
+
+.nav h2 {
+  font-size: 2.5rem;
+}
+
+@media (max-width: 600px) {
+  .nav h2 {
+    font-size: 1.5rem;
+  }
+
+  .nav button {
+    font-size: 0.875rem;
+  }
+}
