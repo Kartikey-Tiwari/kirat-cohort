@@ -289,6 +289,8 @@ form.addEventListener("submit", async (e) => {
 
         setTimeout(() => {
           card.style.zIndex = "auto";
+          card.querySelector(".sprite").style.animationIterationCount =
+            "infinite";
         }, 100);
       }, delay);
       card.canFlip = true;
@@ -304,22 +306,28 @@ function createPokemonCard({
   height,
   weight,
   stats: { hp, attack, defense, speed },
-  abilities,
 }) {
   const color = typeStyles[types[0]];
+  const nameClass = name.length > 18 ? " long" : "";
+  weight = `${weight / 10}kg`;
+  height = `${height / 10}m`;
   const html = `
 <div class="pokemon-card-container">
-  <div class="pokemon-card" ${color ? `style="--card-bg: ${color.bg}; --card-border:${color.border};"` : ""}>
-    <div class="card-face front">
+  <div class="pokemon-card">
+    <div class="card-face front" ${color ? `style="--card-bg: ${color.bg}; --card-border:${color.border};"` : ""}>
       <div class="header">
-        <h2 class="name">${name}</h2>
+        <h2 class="name${nameClass}">${name}</h2>
         <span class="id">#${id}</span>
       </div>
-      <div>
+      <div class="sprite-container">
         <img class="sprite" src="${sprite}">
       </div>
-      <div>
-        <div class="types">${types.join(" ")}</div>
+      <div class="info">
+        <div class="types">${types
+          .map((t) => {
+            return `<div class="type" style="background: ${typeStyles[t].bg}; color: white">${t[0].toUpperCase() + t.slice(1)}</div>`;
+          })
+          .join("")}</div>
         <div class="physical">
           <div> 
             <span>Height</span>
@@ -333,24 +341,27 @@ function createPokemonCard({
         <div class="stats">
           <div>
             <span>HP</span>
-            <span class="hp">${hp}</span>
+            <span class="stat hp">${hp}</span>
           </div>
           <div>
             <span>Attack</span>
-            <span class="attack">${attack}</span>
+            <span class="stat attack">${attack}</span>
           </div>
           <div>
             <span>Defense</span>
-            <span class="defense">${defense}</span>
+            <span class="stat defense">${defense}</span>
           </div>
           <div>
             <span>Speed</span>
-            <span class="speed">${speed}</span>
+            <span class="stat speed">${speed}</span>
           </div>
         </div>
       </div>
     </div>
-    <div class="card-face back"></div>
+    <div class="card-face back">
+<span class="pokeball"></span>
+<h2>Pokemon Card</h2>
+</div>
   </div>
 </div>`;
   const temp = document.createElement("div");
