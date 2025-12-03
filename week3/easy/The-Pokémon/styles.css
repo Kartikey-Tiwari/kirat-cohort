@@ -5,12 +5,17 @@
 }
 
 body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  place-items: center;
   min-height: 100dvh;
   font-family: Arial, Helvetica, sans-serif;
   background: linear-gradient(to right, #357af3 0%, #225be4 100%);
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  position: relative;
+  display: grid;
+  overflow-x: hidden;
+  align-content: center;
 }
 
 form,
@@ -34,7 +39,7 @@ button {
 
 form > p {
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   color: rgba(0, 0, 0, 0.65);
 }
 
@@ -49,7 +54,7 @@ h1 {
 }
 
 form > div {
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   gap: 0.5rem;
 }
 
@@ -78,11 +83,23 @@ button {
   background: linear-gradient(to right, #357af3 0%, #225be4 100%);
   color: white;
   cursor: pointer;
+  font-size: 1rem;
+}
+
+select {
+  background: inherit;
 }
 
 select:focus,
 input:focus {
   outline-color: #357af3;
+}
+
+option {
+  background-color: rgb(from var(--my-color) r g b / 0.4);
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: rgb(0 0 0 / 0.7);
 }
 
 button:hover {
@@ -96,4 +113,50 @@ button:disabled {
 
 button:disabled:hover {
   transform: none;
+}
+
+.pokemon-card-container {
+  width: 300px;
+  height: 400px;
+  perspective: 600px;
+}
+
+.abs {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(var(--rotation-angle, 0deg));
+  transform-origin: center 500px;
+}
+
+.pokemon-card {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1.8);
+  transform-style: preserve-3d;
+  background: var(--card-bg, #eee);
+  border: 3px solid var(--card-border, #ccc);
+  border-radius: 20px;
+}
+
+.pokemon-card.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: 20px;
+}
+
+.back {
+  background: blue;
+  transform: rotateY(180deg);
+}
+
+.sprite {
+  width: 200px;
+  height: 200px;
 }

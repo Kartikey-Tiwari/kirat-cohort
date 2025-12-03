@@ -20,6 +20,50 @@ const POKEMON_TYPES = [
   "fairy",
 ];
 const DEFAULT_CARDS = 5;
+const typeStyles = {
+  normal: {
+    bg: "linear-gradient(135deg, #9ca3af, #6b7280)",
+    border: "#9ca3af",
+  },
+  fire: { bg: "linear-gradient(135deg, #f97316, #dc2626)", border: "#f97316" },
+  water: { bg: "linear-gradient(135deg, #60a5fa, #2563eb)", border: "#60a5fa" },
+  electric: {
+    bg: "linear-gradient(135deg, #fde047, #eab308)",
+    border: "#facc15",
+  },
+  grass: { bg: "linear-gradient(135deg, #4ade80, #16a34a)", border: "#22c55e" },
+  ice: { bg: "linear-gradient(135deg, #67e8f9, #06b6d4)", border: "#22d3ee" },
+  fighting: {
+    bg: "linear-gradient(135deg, #dc2626, #991b1b)",
+    border: "#dc2626",
+  },
+  poison: {
+    bg: "linear-gradient(135deg, #a855f7, #7e22ce)",
+    border: "#a855f7",
+  },
+  ground: {
+    bg: "linear-gradient(135deg, #ca8a04, #b45309)",
+    border: "#d97706",
+  },
+  flying: {
+    bg: "linear-gradient(135deg, #818cf8, #0ea5e9)",
+    border: "#38bdf8",
+  },
+  psychic: {
+    bg: "linear-gradient(135deg, #ec4899, #be185d)",
+    border: "#ec4899",
+  },
+  bug: { bg: "linear-gradient(135deg, #84cc16, #16a34a)", border: "#65a30d" },
+  rock: { bg: "linear-gradient(135deg, #a16207, #57534e)", border: "#57534e" },
+  ghost: { bg: "linear-gradient(135deg, #7e22ce, #312e81)", border: "#7e22ce" },
+  dragon: {
+    bg: "linear-gradient(135deg, #4f46e5, #7e22ce)",
+    border: "#4f46e5",
+  },
+  dark: { bg: "linear-gradient(135deg, #374151, #111827)", border: "#1f2937" },
+  steel: { bg: "linear-gradient(135deg, #94a3b8, #475569)", border: "#64748b" },
+  fairy: { bg: "linear-gradient(135deg, #f9a8d4, #ec4899)", border: "#f472b6" },
+};
 
 const formatPokemonName = (() => {
   function capitalize(word) {
@@ -128,6 +172,7 @@ POKEMON_TYPES.forEach((type) => {
   const option = document.createElement("option");
   option.value = type;
   option.textContent = type[0].toUpperCase() + type.slice(1);
+  option.style.setProperty("--my-color", typeStyles[type].border);
   typeSelector.appendChild(option);
 });
 numCardSelector.value = DEFAULT_CARDS;
@@ -139,7 +184,7 @@ form.addEventListener("submit", async (e) => {
   const pokemonType = typeSelector.value;
   if (POKEMON_TYPES.findIndex((t) => t === pokemonType) === -1) return;
   const numCards = Number(numCardSelector.value);
-  if (isNaN(numCards) || numCards <= 0 || numCards >= 30) return;
+  if (isNaN(numCards) || numCards <= 0 || numCards > 30) return;
 
   const pokemonsOfSelectedType = (await P.getTypeByName(pokemonType)).pokemon;
   shuffle(pokemonsOfSelectedType);
@@ -148,8 +193,11 @@ form.addEventListener("submit", async (e) => {
     const data = await P.resource(p.pokemon.url);
     const id = data.id >= 10000 ? data.species.url.split("/").at(-2) : data.id;
     const sprite =
+      data.sprites.other["official-artwork"].front_default ??
       data.sprites.front_default ??
-      (await P.resource(`/api/v2/pokemon/${id}`)).sprites.front_default;
+      (await P.resource(`/api/v2/pokemon/${id}`)).sprites.other[
+        "official-artwork"
+      ].front_default;
 
     return {
       id,
@@ -177,10 +225,75 @@ form.addEventListener("submit", async (e) => {
   submit.textContent = "Generate Cards";
   submit.disabled = false;
 
-  document.body.insertAdjacentHTML(
-    "afterbegin",
-    createPokemonCard(pokemonsData[0]),
-  );
+  const anglePerCard = 10;
+  const maxSpread = 90;
+  let totalArc = (numCards - 1) * anglePerCard;
+  if (totalArc > maxSpread) {
+    totalArc = maxSpread;
+  }
+  const step = numCards > 1 ? totalArc / (numCards - 1) : 0;
+  const startAngle = totalArc / -2;
+  const pokemonCards = pokemonsData.map((pokemon, index) => {
+    const cardContainer = createPokemonCard(pokemon);
+    const card = cardContainer.firstElementChild;
+    cardContainer.canFlip = false;
+    card.addEventListener("click", () => {
+      if (cardContainer.canFlip) {
+        card.classList.toggle("flipped");
+      }
+    });
+    cardContainer.classList.add("abs");
+    cardContainer.style.zIndex = numCards - index;
+
+    cardContainer.style.setProperty(
+      "--rotation-angle",
+      `${startAngle + index * step}deg`,
+    );
+    setTimeout(() => {
+      document.body.appendChild(cardContainer);
+    }, 50 * index);
+    return cardContainer;
+  });
+
+  setTimeout(() => {
+    const firstPositions = pokemonCards.map((card) =>
+      card.getBoundingClientRect(),
+    );
+    document.querySelectorAll(".pokemon-card-container").forEach((p) => {
+      p.classList.remove("abs");
+    });
+
+    pokemonCards.forEach((card, index) => {
+      const first = firstPositions[index];
+      const last = card.getBoundingClientRect();
+      const firstCenterX = first.left + first.width / 2;
+      const firstCenterY = first.top + first.height / 2;
+
+      const lastCenterX = last.left + last.width / 2;
+      const lastCenterY = last.top + last.height / 2;
+
+      const deltaX = firstCenterX - lastCenterX;
+      const deltaY = firstCenterY - lastCenterY;
+
+      card.style.transform = `translate(${deltaX}px, ${deltaY}px) rotate(${startAngle + index * step}deg)`;
+
+      document.body.offsetHeight;
+
+      const delay = index * 100;
+
+      setTimeout(() => {
+        card.style.zIndex = 9999;
+
+        card.style.transition = `transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1.2)`;
+        card.style.transform = "";
+
+        setTimeout(() => {
+          card.style.zIndex = "auto";
+        }, 100);
+      }, delay);
+      card.canFlip = true;
+    });
+  }, 60 * numCards);
 });
 
 function createPokemonCard({
@@ -193,13 +306,14 @@ function createPokemonCard({
   stats: { hp, attack, defense, speed },
   abilities,
 }) {
-  return `
+  const color = typeStyles[types[0]];
+  const html = `
 <div class="pokemon-card-container">
-  <div class="pokemon-card">
+  <div class="pokemon-card" ${color ? `style="--card-bg: ${color.bg}; --card-border:${color.border};"` : ""}>
     <div class="card-face front">
       <div class="header">
         <h2 class="name">${name}</h2>
-        <span class="id">${id}</span>
+        <span class="id">#${id}</span>
       </div>
       <div>
         <img class="sprite" src="${sprite}">
@@ -238,6 +352,8 @@ function createPokemonCard({
     </div>
     <div class="card-face back"></div>
   </div>
-</div>
-`;
+</div>`;
+  const temp = document.createElement("div");
+  temp.insertAdjacentHTML("afterbegin", html);
+  return temp.firstElementChild;
 }
