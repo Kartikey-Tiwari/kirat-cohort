@@ -108,6 +108,12 @@
     .button-container .pin-color-btn.hidden {
       display: none;
     }
+    @media (max-width: 500px) {
+      .modal {
+        box-sizing: border-box;
+        width: 90vw;
+      }
+    }
   </style>
   <body>
     <div class="modal">
@@ -180,6 +186,9 @@
           button = buttonContainer.firstElementChild;
           buttonTextLight = buttonContainer.lastElementChild;
           button.removeEventListener("click", button.changeColor);
+          buttonContainer
+            .querySelector(".pin-color-btn")
+            .classList.remove("hidden");
         } else {
           buttonContainer = document.createElement("div");
           buttonContainer.classList.add("button-container");
