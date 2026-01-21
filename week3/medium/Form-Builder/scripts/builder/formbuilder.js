@@ -14,9 +14,15 @@ export default function builder() {
     radio: radioInputContainer(),
   };
 
-  const addInputBtn = button("Add Input", (e) => {
-    e.preventDefault();
-  });
+  const addInputBtn = button(
+    "Add Input",
+    (e) => {
+      e.preventDefault();
+      form.reportValidity();
+    },
+    "",
+    "submit",
+  );
   const inputs = inputTypeSelector(inputTypes, (e) => {
     addInputBtn.previousElementSibling.remove();
     form.insertBefore(
@@ -37,7 +43,7 @@ function inputTypeSelector(inputTypes, inputHandler) {
   const id = crypto.randomUUID();
   const labelHtml = `<label for="${id}">Type of Input</label>`;
   const label = createElementFromHTML(labelHtml);
-  const selectHtml = `<select class="bg-white p-1" id=${id}>${inputTypes.map((i) => `<option value="${i}">${i}</option>`).join("")}</select>`;
+  const selectHtml = `<select class="bg-white p-1 rounded-md" id=${id}>${inputTypes.map((i) => `<option value="${i}">${i}</option>`).join("")}</select>`;
   const select = createElementFromHTML(selectHtml);
   const div = document.createElement("div");
   div.setAttribute("class", "flex gap-1 items-center");

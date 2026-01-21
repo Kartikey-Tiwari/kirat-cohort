@@ -3,11 +3,19 @@ import radioInput from "./radioinput.js";
 
 export default function radioInputContainer() {
   const div = document.createElement("div");
-  div.append(radioInput(crypto.randomUUID()));
+  const cache = [radioInput(crypto.randomUUID())];
+  div.append(cache[0]);
   div.append(
     button("Add radio input", (e) => {
       e.preventDefault();
-      div.insertBefore(radioInput(crypto.randomUUID()), div.lastElementChild);
+      if (e.target.closest("form").reportValidity()) {
+        const el = cache.length
+          ? cache.pop()
+          : radioInput(crypto.randomUUID(), (el) => {
+              cache.push(el);
+            });
+        div.insertBefore(el, div.lastElementChild);
+      }
     }),
   );
   return div;
