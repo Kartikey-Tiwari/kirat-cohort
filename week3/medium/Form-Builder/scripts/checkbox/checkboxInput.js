@@ -13,13 +13,23 @@ export default function checkboxInput(id, removeHandler = () => {}) {
   const chkbox = checkbox(id + "_check", "Checked");
   const deleteButton = button("Remove", (e) => {
     e.preventDefault();
-    div.remove();
-    div.querySelectorAll("input").forEach((i) => (i.value = ""));
-    removeHandler(div);
+    if (!div.matches(":only-child")) {
+      div.remove();
+      div.querySelectorAll("input").forEach((i) => (i.value = ""));
+      removeHandler();
+    }
   });
   const row = document.createElement("div");
-  row.append(chkbox, deleteButton);
-  row.setAttribute("class", "flex justify-between");
-  div.append(labelInput, row);
-  return div;
+  row.append(chkbox.el, deleteButton);
+  row.setAttribute("class", "flex justify-between mt-1");
+  div.append(labelInput.el, row);
+  return {
+    getValue() {
+      return {
+        label: labelInput.getValue(),
+        checked: chkbox.getValue(),
+      };
+    },
+    el: div,
+  };
 }

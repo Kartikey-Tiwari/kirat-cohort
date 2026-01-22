@@ -10,5 +10,10 @@ export default function textInput(
   const html = `<div><label for="${id}">${label}</label><input${required ? " required" : ""} class="px-1 bg-white rounded-md" id="${id}" placeholder="${placeholder}"></div>`;
   const el = createElementFromHTML(html);
   el.setAttribute("class", el.getAttribute("class") ?? "" + " " + style);
-  return el;
+  return {
+    getValue() {
+      return el.querySelector("input").value;
+    },
+    el,
+  };
 }

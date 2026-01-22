@@ -1,6 +1,7 @@
 import button from "../button/button.js";
 import checkboxInputContainer from "../checkbox/checkboxinputcontainer.js";
 import radioInputContainer from "../radio/radioinputcontainer.js";
+import heading from "../text/heading.js";
 import textInputContainer from "../text/textInputContainer.js";
 import createElementFromHTML from "../utils.js";
 
@@ -18,7 +19,11 @@ export default function builder() {
     "Add Input",
     (e) => {
       e.preventDefault();
-      form.reportValidity();
+      if (form.reportValidity()) {
+        const selectedType = inputs.getValue();
+        const selectedTypeData = inputTypesAndElements[selectedType].getValue();
+        console.log(selectedTypeData);
+      }
     },
     "",
     "submit",
@@ -26,7 +31,7 @@ export default function builder() {
   const inputs = inputTypeSelector(inputTypes, (e) => {
     addInputBtn.previousElementSibling.remove();
     form.insertBefore(
-      inputTypesAndElements[e.target.value],
+      inputTypesAndElements[e.target.value].el,
       form.lastElementChild,
     );
   });
@@ -34,7 +39,7 @@ export default function builder() {
   const section = document.createElement("section");
   const form = document.createElement("form");
   form.setAttribute("class", "p-3 flex flex-col gap-3");
-  form.append(h2, inputs, inputTypesAndElements.text, addInputBtn);
+  form.append(h2, inputs.el, inputTypesAndElements.text.el, addInputBtn);
   section.append(form);
   return section;
 }
@@ -50,10 +55,10 @@ function inputTypeSelector(inputTypes, inputHandler) {
   div.append(label, select);
 
   select.addEventListener("input", inputHandler);
-  return div;
-}
-
-function heading(text) {
-  const html = `<h2 class="text-4xl font-semibold">${text}</h2>`;
-  return createElementFromHTML(html);
+  return {
+    getValue: () => {
+      return select.value;
+    },
+    el: div,
+  };
 }

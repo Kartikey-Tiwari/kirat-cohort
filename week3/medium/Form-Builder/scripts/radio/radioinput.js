@@ -13,9 +13,11 @@ export default function radioInput(id, removeHandler = () => {}) {
     "Remove",
     (e) => {
       e.preventDefault();
-      div.remove();
-      div.querySelectorAll("input").forEach((i) => (i.value = ""));
-      removeHandler(div);
+      if (!div.matches(":only-child")) {
+        div.remove();
+        div.querySelectorAll("input").forEach((i) => (i.value = ""));
+        removeHandler(div);
+      }
     },
     "self-end",
     "button",
@@ -23,6 +25,13 @@ export default function radioInput(id, removeHandler = () => {}) {
   const row = document.createElement("div");
   row.append(deleteButton);
   row.setAttribute("class", "flex flex-col gap-1");
-  div.append(labelInput, row);
-  return div;
+  div.append(labelInput.el, row);
+  return {
+    getValue() {
+      return {
+        label: labelInput.getValue(),
+      };
+    },
+    el: div,
+  };
 }
