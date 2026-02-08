@@ -1,33 +1,27 @@
 import button from "../button/button.js";
-import checkboxInputContainer from "../checkbox/checkboxinputcontainer.js";
-import radioInputContainer from "../radio/radioinputcontainer.js";
 import heading from "../text/heading.js";
-import textInputContainer from "../text/textInputContainer.js";
 import createElementFromHTML from "../utils.js";
 
-export default function builder() {
+export default function builder(
+  inputTypes,
+  onSubmit = () => {},
+  onInput = () => {},
+) {
   const h2 = heading("Form builder");
 
-  const inputTypes = ["text", "checkbox", "radio"];
-  const inputTypesAndElements = {
-    text: textInputContainer(),
-    checkbox: checkboxInputContainer(),
-    radio: radioInputContainer(),
-  };
+  const inputTypesAndElements = {};
+  for (const o of inputTypes) {
+    inputTypesAndElements[o.name] = o.component;
+  }
 
-  const addInputBtn = button(
-    "Add Input",
-    (e) => {
-      e.preventDefault();
-      if (form.reportValidity()) {
-        const selectedType = inputs.getValue();
-        const selectedTypeData = inputTypesAndElements[selectedType].getValue();
-        console.log(selectedTypeData);
-      }
-    },
-    "",
-    "submit",
-  );
+  function addInputHandler(e) {
+    e.preventDefault();
+    if (form.reportValidity()) {
+      const data = getValue();
+      onSubmit(data);
+    }
+  }
+  const addInputBtn = button("Add Input", addInputHandler, "", "submit");
   const inputs = inputTypeSelector(inputTypes, (e) => {
     addInputBtn.previousElementSibling.remove();
     form.insertBefore(
@@ -41,14 +35,35 @@ export default function builder() {
   form.setAttribute("class", "p-3 flex flex-col gap-3");
   form.append(h2, inputs.el, inputTypesAndElements.text.el, addInputBtn);
   section.append(form);
-  return section;
+  form.addEventListener("input", (e) => {
+    onInput(getValue());
+  });
+
+  function getValue() {
+    return {
+      type: inputs.getValue(),
+      data: inputTypesAndElements[inputs.getValue()].getValue(),
+    };
+  }
+  return {
+    updateSubmitHandler(update) {
+      addInputBtn.updateHandler(update);
+    },
+    getValue,
+    el: section,
+    changeInputType(type) {
+      const select = inputs.el.querySelector("select");
+      select.value = type;
+      select.dispatchEvent(new Event("input", { bubbles: true }));
+    },
+  };
 }
 
 function inputTypeSelector(inputTypes, inputHandler) {
   const id = crypto.randomUUID();
   const labelHtml = `<label for="${id}">Type of Input</label>`;
   const label = createElementFromHTML(labelHtml);
-  const selectHtml = `<select class="bg-white p-1 rounded-md" id=${id}>${inputTypes.map((i) => `<option value="${i}">${i}</option>`).join("")}</select>`;
+  const selectHtml = `<select class="bg-white p-1 rounded-md" id=${id}>${inputTypes.map((i) => `<option value="${i.name}">${i.name}</option>`).join("")}</select>`;
   const select = createElementFromHTML(selectHtml);
   const div = document.createElement("div");
   div.setAttribute("class", "flex gap-1 items-center");

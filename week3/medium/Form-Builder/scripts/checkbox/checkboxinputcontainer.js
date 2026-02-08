@@ -8,12 +8,15 @@ export default function checkboxInputContainer() {
   const cache = [];
 
   function createRemovableCheckbox() {
-    const obj = checkboxInput(crypto.randomUUID(), () => {
+    const obj = checkboxInput(crypto.randomUUID(), (isTrusted = true) => {
       idx--;
       const i = cache.findIndex((o) => o === obj);
       if (i !== -1) {
         cache.splice(i, 1);
         cache.push(obj);
+      }
+      if (isTrusted) {
+        obj.el.dispatchEvent(new Event("input", { bubbles: true }));
       }
     });
     cache.push(obj);
@@ -45,6 +48,15 @@ export default function checkboxInputContainer() {
     }),
   );
   return {
+    fill(data) {
+      caption.fill(data.data.caption);
+    },
+    reset() {
+      caption.reset();
+      for (let i = idx - 1; i >= 0; i--) {
+        cache[i].reset();
+      }
+    },
     getValue() {
       return {
         caption: caption.getValue(),

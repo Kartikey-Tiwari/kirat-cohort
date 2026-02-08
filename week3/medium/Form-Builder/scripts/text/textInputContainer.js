@@ -27,6 +27,18 @@ export default function textInputContainer() {
   div.append(placeholder.el);
   div.append(required.el);
   return {
+    fill(data) {
+      label.fill(data.data.label);
+      maxLen.fill(data.data.maxLen);
+      placeholder.fill(data.data.placeholder);
+      required.fill(data.data.required);
+    },
+    reset() {
+      label.reset();
+      maxLen.reset();
+      placeholder.reset();
+      required.reset();
+    },
     getValue() {
       return {
         label: label.getValue(),

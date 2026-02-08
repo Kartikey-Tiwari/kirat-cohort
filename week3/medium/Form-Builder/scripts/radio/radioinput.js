@@ -14,9 +14,9 @@ export default function radioInput(id, removeHandler = () => {}) {
     (e) => {
       e.preventDefault();
       if (!div.matches(":only-child")) {
+        removeHandler();
         div.remove();
         div.querySelectorAll("input").forEach((i) => (i.value = ""));
-        removeHandler(div);
       }
     },
     "self-end",
@@ -27,6 +27,14 @@ export default function radioInput(id, removeHandler = () => {}) {
   row.setAttribute("class", "flex flex-col gap-1");
   div.append(labelInput.el, row);
   return {
+    reset() {
+      labelInput.reset();
+      if (!div.matches(":only-child")) {
+        removeHandler(false);
+        div.remove();
+      }
+      div.querySelectorAll("input").forEach((i) => (i.value = ""));
+    },
     getValue() {
       return {
         label: labelInput.getValue(),

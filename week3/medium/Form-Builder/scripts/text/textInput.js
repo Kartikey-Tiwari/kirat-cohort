@@ -11,6 +11,12 @@ export default function textInput(
   const el = createElementFromHTML(html);
   el.setAttribute("class", el.getAttribute("class") ?? "" + " " + style);
   return {
+    fill(label) {
+      el.querySelector("input").value = label;
+    },
+    reset() {
+      el.querySelector("input").value = "";
+    },
     getValue() {
       return el.querySelector("input").value;
     },

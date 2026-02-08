@@ -14,9 +14,9 @@ export default function checkboxInput(id, removeHandler = () => {}) {
   const deleteButton = button("Remove", (e) => {
     e.preventDefault();
     if (!div.matches(":only-child")) {
+      removeHandler();
       div.remove();
       div.querySelectorAll("input").forEach((i) => (i.value = ""));
-      removeHandler();
     }
   });
   const row = document.createElement("div");
@@ -24,6 +24,13 @@ export default function checkboxInput(id, removeHandler = () => {}) {
   row.setAttribute("class", "flex justify-between mt-1");
   div.append(labelInput.el, row);
   return {
+    reset() {
+      if (!div.matches(":only-child")) {
+        removeHandler(false);
+        div.remove();
+      }
+      div.querySelectorAll("input").forEach((i) => (i.value = ""));
+    },
     getValue() {
       return {
         label: labelInput.getValue(),
