@@ -16,7 +16,7 @@ const inputTypes = [
 
 function createTextPreview(data) {
   const id = crypto.randomUUID();
-  const html = `<div class="flex flex-col gap-1"><label class="font-md text-gray-700" for="${id}">${data.data.label}</label><input class="text-lg bg-white rounded-md px-2 py-1 border-1 border-gray-200 focus:outline-2 focus:outline-blue-400" id="${id}" maxlength=${data.data.maxLen} placeholder="${data.data.placeholder}"${data.data.required ? " required" : ""}></div>`;
+  const html = `<div class="flex flex-col gap-1"><label class="font-md text-gray-700 min-h-[1.5rem]" for="${id}">${data.data.label}</label><input class="text-lg bg-white rounded-md px-2 py-1 border-1 border-gray-200 focus:outline-2 focus:outline-blue-400" id="${id}" maxlength=${data.data.maxLen} placeholder="${data.data.placeholder}"${data.data.required ? " required" : ""}></div>`;
   const el = createElementFromHTML(html);
   function sync(data) {
     el.querySelector("label").textContent = data.data.label;
@@ -29,7 +29,7 @@ function createTextPreview(data) {
 }
 
 function createCheckboxPreview(data) {
-  const html = `<fieldset><legend class="font-md text-gray-700">${data?.data?.caption}</legend></fieldset>`;
+  const html = `<fieldset><legend class="contents font-md text-gray-700 min-h-[1.5rem]">${data?.data?.caption}</legend></fieldset>`;
   const el = createElementFromHTML(html);
   for (const i of data.data.checkboxes) {
     const chkbox = checkbox(crypto.randomUUID(), i.label, i.checked, "text-lg");
@@ -67,7 +67,7 @@ function createCheckboxPreview(data) {
 }
 
 function createRadioPreview(data) {
-  const html = `<fieldset><legend class="font-md text-gray-700">${data?.data?.caption}</legend></fieldset>`;
+  const html = `<fieldset><legend class="contents font-md text-gray-700 min-h-[1.5rem]">${data?.data?.caption}</legend></fieldset>`;
   const el = createElementFromHTML(html);
   for (const i of data.data.radios) {
     const radio = radioBtn(crypto.randomUUID(), i.name, i.label);
@@ -132,10 +132,24 @@ function handleBuilderSubmit(data) {
     if (editing) return;
     editing = true;
     type.previewCache = el;
+    el.el.classList.add(
+      "shadow-lg",
+      "border-1",
+      "border-gray-200",
+      "rounded-md",
+      "scale-101",
+    );
     type.component.fill(committed[index].data);
     formBuilder.changeInputType(type.name);
     formPreview.addPreview();
     function update() {
+      el.el.classList.remove(
+        "shadow-lg",
+        "border-1",
+        "border-gray-200",
+        "rounded-md",
+        "scale-101",
+      );
       const updatedData = formBuilder.getValue();
       committed[index].data = updatedData;
       type.previewCache = null;
@@ -144,17 +158,25 @@ function handleBuilderSubmit(data) {
     }
     formBuilder.updateSubmitHandler(update);
   }
+  function deleteInput() {
+    if (!editing) {
+      committed.splice(index, 1);
+      wrapper.remove();
+    }
+  }
   const wrapper = document.createElement("div");
   wrapper.classList.add("group");
   wrapper.classList.add("relative");
-  const editBtn = button(
-    "Edit",
-    () => {},
-    "absolute bottom-0 right-0 hidden group-hover:block",
+  const row = document.createElement("div");
+  row.setAttribute(
+    "class",
+    "absolute bottom-0 right-0 hidden group-hover:flex gap-3",
   );
-  editBtn.addEventListener("click", edit);
+  const editBtn = button("Edit", edit);
+  const deleteBtn = button("Delete", deleteInput);
 
-  wrapper.append(type.previewCache.el, editBtn);
+  row.append(editBtn, deleteBtn);
+  wrapper.append(type.previewCache.el, row);
   formPreview.commit(wrapper);
   type.previewCache = null;
   type.component.reset();

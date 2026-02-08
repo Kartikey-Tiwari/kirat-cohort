@@ -22,7 +22,11 @@ export default function builder(
     }
   }
   const addInputBtn = button("Add Input", addInputHandler, "", "submit");
+  let inputChangeDisabled = false;
   const inputs = inputTypeSelector(inputTypes, (e) => {
+    if (inputChangeDisabled) {
+      return;
+    }
     addInputBtn.previousElementSibling.remove();
     form.insertBefore(
       inputTypesAndElements[e.target.value].el,
@@ -47,7 +51,13 @@ export default function builder(
   }
   return {
     updateSubmitHandler(update) {
-      addInputBtn.updateHandler(update);
+      inputs.el.querySelector("select").disabled = true;
+      inputChangeDisabled = true;
+      addInputBtn.updateHandler(() => {
+        inputs.el.querySelector("select").disabled = false;
+        inputChangeDisabled = false;
+        update();
+      });
     },
     getValue,
     el: section,

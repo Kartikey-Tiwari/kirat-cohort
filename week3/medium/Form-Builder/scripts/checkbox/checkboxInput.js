@@ -24,6 +24,10 @@ export default function checkboxInput(id, removeHandler = () => {}) {
   row.setAttribute("class", "flex justify-between mt-1");
   div.append(labelInput.el, row);
   return {
+    fill(label, checked) {
+      labelInput.fill(label);
+      chkbox.fill(checked);
+    },
     reset() {
       if (!div.matches(":only-child")) {
         removeHandler(false);

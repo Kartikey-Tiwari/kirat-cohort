@@ -55,6 +55,23 @@ export default function radioInputContainer() {
     }),
   );
   return {
+    fill(data) {
+      caption.fill(data.data.caption);
+      name.fill(data.data.name);
+      const radios = data.data.radios;
+      for (let i = 0; i < idx; i++) {
+        cache[i].reset();
+      }
+      idx = 0;
+      for (let i = 0; i < radios.length; i++) {
+        idx++;
+        if (i < cache.length) {
+          const x = cache[i];
+          x.fill(radios[i].label);
+          container.append(x.el);
+        }
+      }
+    },
     reset() {
       caption.reset();
       name.reset();

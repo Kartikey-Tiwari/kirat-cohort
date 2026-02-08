@@ -50,6 +50,19 @@ export default function checkboxInputContainer() {
   return {
     fill(data) {
       caption.fill(data.data.caption);
+      const checkboxes = data.data.checkboxes;
+      for (let i = 0; i < idx; i++) {
+        cache[i].reset();
+      }
+      idx = 0;
+      for (let i = 0; i < checkboxes.length; i++) {
+        idx++;
+        if (i < cache.length) {
+          const x = cache[i];
+          x.fill(checkboxes[i].label, checkboxes[i].checked);
+          container.append(x.el);
+        }
+      }
     },
     reset() {
       caption.reset();

@@ -27,6 +27,9 @@ export default function radioInput(id, removeHandler = () => {}) {
   row.setAttribute("class", "flex flex-col gap-1");
   div.append(labelInput.el, row);
   return {
+    fill(label) {
+      labelInput.fill(label);
+    },
     reset() {
       labelInput.reset();
       if (!div.matches(":only-child")) {
