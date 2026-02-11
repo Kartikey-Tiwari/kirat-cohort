@@ -1,6 +1,8 @@
 import button from "../button/button.js";
+import radioBtn from "../radio/radio.js";
 import textInput from "../text/textInput.js";
 import checkboxInput from "./checkboxInput.js";
+import { stylesRow } from "./styleRow.js";
 
 export default function checkboxInputContainer() {
   const div = document.createElement("div");
@@ -34,7 +36,9 @@ export default function checkboxInputContainer() {
   container.append(cache[0].el);
   container.setAttribute("class", "flex flex-col gap-1");
 
-  div.append(caption.el, container);
+  const styleRow = stylesRow(2, "checkbox");
+
+  div.append(caption.el, container, styleRow.el);
   div.append(
     button("Add checkbox input", (e) => {
       e.preventDefault();
@@ -63,17 +67,20 @@ export default function checkboxInputContainer() {
           container.append(x.el);
         }
       }
+      styleRow.fill(data.data.style);
     },
     reset() {
       caption.reset();
       for (let i = idx - 1; i >= 0; i--) {
         cache[i].reset();
       }
+      styleRow.reset();
     },
     getValue() {
       return {
         caption: caption.getValue(),
         checkboxes: cache.slice(0, idx).map((o) => o.getValue()),
+        style: styleRow.getValue(),
       };
     },
     el: div,

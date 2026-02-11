@@ -16,30 +16,121 @@ const inputTypes = [
 
 function createTextPreview(data) {
   const id = crypto.randomUUID();
-  const html = `<div class="flex flex-col gap-1"><label class="font-md text-gray-700 min-h-[1.5rem]" for="${id}">${data.data.label}</label><input class="text-lg bg-white rounded-md px-2 py-1 border-1 border-gray-200 focus:outline-2 focus:outline-blue-400" id="${id}" maxlength=${data.data.maxLen} placeholder="${data.data.placeholder}"${data.data.required ? " required" : ""}></div>`;
+  const html = `<div><label class="font-md text-gray-700 min-h-[1.5rem]" for="${id}">${data.data.label}</label><input class="text-lg bg-white rounded-md px-2 py-1 border-1 border-gray-200 focus:outline-2 focus:outline-blue-400" id="${id}" maxlength=${data.data.maxLen} placeholder="${data.data.placeholder}"${data.data.required ? " required" : ""}></div>`;
+  const baseStyles = {
+    div: "flex gap-1 ",
+    label: "text-base leading-none",
+    input:
+      "text-lg bg-white rounded-md px-2 py-1 border-1 border-gray-200 focus:outline-2 focus:outline-blue-400",
+  };
+  const styles = {
+    style1: {
+      div: "flex-col",
+      label: "min-h-[1rem] text-gray-700",
+      input: "",
+    },
+    style2: {
+      div: "items-center",
+      label: "flex-1 text-gray-700",
+      input: "flex-3",
+    },
+    style3: {
+      div: "relative",
+      label: `absolute top-1/2 left-2 -translate-y-1/2 text-gray-500
+      has-[+input:focus]:text-xs
+      has-[+input:focus]:-top-[0.375rem]
+      has-[+input:focus]:translate-y-0 
+      transition-[top]
+      transition-[color]
+      has-[+input:focus]:z-1
+      has-[+input:focus]:bg-gradient-to-b
+      has-[+input:focus]:from-[#f5f5f5]
+      has-[+input:focus]:from-50%
+      has-[+input:focus]:to-[#ffffff]
+      has-[+input:focus]:to-50%
+      has-[+input:focus]:text-gray-700
+      not-has-[+input:placeholder-shown]:text-xs
+      not-has-[+input:placeholder-shown]:-top-[0.375rem]
+      not-has-[+input:placeholder-shown]:translate-y-0 
+      not-has-[+input:placeholder-shown]:z-1
+      not-has-[+input:placeholder-shown]:bg-gradient-to-b
+      not-has-[+input:placeholder-shown]:from-[#f5f5f5]
+      not-has-[+input:placeholder-shown]:from-50%
+      not-has-[+input:placeholder-shown]:to-[#ffffff]
+      not-has-[+input:placeholder-shown]:to-50%
+      not-has-[+input:placeholder-shown]:text-gray-700
+      `,
+      input: "",
+    },
+  };
   const el = createElementFromHTML(html);
   function sync(data) {
-    el.querySelector("label").textContent = data.data.label;
+    const label = el.querySelector("label");
+    label.textContent = data.data.label;
     const input = el.querySelector("input");
     input.setAttribute("maxlength", data.data.maxLen);
     input.setAttribute("placeholder", data.data.placeholder);
     input.setAttribute("required", data.data.required);
+
+    el.setAttribute(
+      "class",
+      baseStyles.div + " " + styles[data.data.style].div,
+    );
+    label.setAttribute(
+      "class",
+      baseStyles.label + " " + styles[data.data.style].label,
+    );
+    input.setAttribute(
+      "class",
+      baseStyles.input + " " + styles[data.data.style].input,
+    );
   }
   return { el, sync };
 }
 
 function createCheckboxPreview(data) {
-  const html = `<fieldset><legend class="contents font-md text-gray-700 min-h-[1.5rem]">${data?.data?.caption}</legend></fieldset>`;
+  const html = `<fieldset><legend>${data?.data?.caption}</legend><div></div></fieldset>`;
   const el = createElementFromHTML(html);
+  const div = el.querySelector("div");
   for (const i of data.data.checkboxes) {
     const chkbox = checkbox(crypto.randomUUID(), i.label, i.checked, "text-lg");
-    el.append(chkbox.el);
+    div.append(chkbox.el);
   }
 
-  function sync(data) {
-    el.querySelector("legend").textContent = data.data.caption;
+  const baseStyles = {
+    el: "border-1 border-gray-200 px-4 pb-2",
+    legend: "font-md text-gray-700",
+    checkboxes: "flex gap-1",
+  };
 
-    const divs = el.querySelectorAll("div");
+  const styles = {
+    style1: {
+      el: "",
+      legend: "",
+      checkboxes: "flex-col",
+    },
+    style2: {
+      el: "",
+      legend: "",
+      checkboxes: "items-center gap-3 flex-wrap",
+    },
+  };
+
+  function sync(data) {
+    const legend = el.querySelector("legend");
+    el.setAttribute("class", baseStyles.el + " " + styles[data.data.style].el);
+    legend.setAttribute(
+      "class",
+      baseStyles.legend + " " + styles[data.data.style].legend,
+    );
+    div.setAttribute(
+      "class",
+      baseStyles.checkboxes + " " + styles[data.data.style].checkboxes,
+    );
+
+    legend.textContent = data.data.caption;
+
+    const divs = el.querySelectorAll("div > div");
     if (divs.length > data.data.checkboxes.length) {
       for (let i = data.data.checkboxes.length; i < divs.length; i++) {
         divs[i].remove();
@@ -58,7 +149,7 @@ function createCheckboxPreview(data) {
           data.data.checkboxes[i].checked,
           "text-lg",
         );
-        el.append(chkbox.el);
+        div.append(chkbox.el);
       }
     }
   }
@@ -67,19 +158,52 @@ function createCheckboxPreview(data) {
 }
 
 function createRadioPreview(data) {
-  const html = `<fieldset><legend class="contents font-md text-gray-700 min-h-[1.5rem]">${data?.data?.caption}</legend></fieldset>`;
+  const html = `<fieldset><legend>${data?.data?.caption}</legend><div></div></fieldset>`;
   const el = createElementFromHTML(html);
+  const div = el.querySelector("div");
+  const legend = el.querySelector("legend");
   for (const i of data.data.radios) {
     const radio = radioBtn(crypto.randomUUID(), i.name, i.label);
-    el.append(radio.el);
+    div.append(radio.el);
   }
+
+  const baseStyles = {
+    el: "border-1 border-gray-200 px-4 pb-2",
+    legend: "font-md text-gray-700",
+    radios: "flex gap-1",
+  };
+
+  const styles = {
+    style1: {
+      el: "",
+      legend: "",
+      radios: "flex-col",
+    },
+    style2: {
+      el: "",
+      legend: "",
+      radios: "items-center gap-3 flex-wrap",
+    },
+  };
 
   return {
     el,
     sync(data) {
-      el.querySelector("legend").textContent = data.data.caption;
+      el.setAttribute(
+        "class",
+        baseStyles.el + " " + styles[data.data.style].el,
+      );
+      legend.setAttribute(
+        "class",
+        baseStyles.legend + " " + styles[data.data.style].legend,
+      );
+      div.setAttribute(
+        "class",
+        baseStyles.radios + " " + styles[data.data.style].radios,
+      );
+      legend.textContent = data.data.caption;
 
-      const divs = el.querySelectorAll("div");
+      const divs = el.querySelectorAll("div > div");
       if (divs.length > data.data.radios.length) {
         for (let i = data.data.radios.length; i < divs.length; i++) {
           divs[i].remove();
@@ -100,7 +224,7 @@ function createRadioPreview(data) {
             data.data.radios[i].name,
             data.data.radios[i].label,
           );
-          el.append(radio.el);
+          div.append(radio.el);
         }
       }
     },

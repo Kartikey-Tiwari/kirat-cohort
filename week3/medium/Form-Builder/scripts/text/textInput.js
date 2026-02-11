@@ -16,6 +16,7 @@ export default function textInput(
     },
     reset() {
       el.querySelector("input").value = "";
+      el.querySelector("input").disabled = false;
     },
     getValue() {
       return el.querySelector("input").value;

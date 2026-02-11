@@ -1,4 +1,5 @@
 import button from "../button/button.js";
+import { stylesRow } from "../checkbox/styleRow.js";
 import textInput from "../text/textInput.js";
 import radioInput from "./radioinput.js";
 
@@ -40,7 +41,9 @@ export default function radioInputContainer() {
   container.append(cache[0].el);
   container.setAttribute("class", "flex flex-col gap-1");
 
-  div.append(caption.el, name.el, container);
+  const styleRow = stylesRow(2, "radio");
+
+  div.append(caption.el, name.el, container, styleRow.el);
 
   div.append(
     button("Add radio input", (e) => {
@@ -71,6 +74,7 @@ export default function radioInputContainer() {
           container.append(x.el);
         }
       }
+      styleRow.fill(data.data.style);
     },
     reset() {
       caption.reset();
@@ -78,12 +82,14 @@ export default function radioInputContainer() {
       for (let i = idx - 1; i >= 0; i--) {
         cache[i].reset();
       }
+      styleRow.reset();
     },
     getValue() {
       return {
         caption: caption.getValue(),
         name: name.getValue(),
         radios: cache.slice(0, idx).map((o) => o.getValue()),
+        style: styleRow.getValue(),
       };
     },
     el: div,
